@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>WEB19 3D Molecules - Interactive Molecular Visualization</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@600&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+:root {
+        --primary: #6b34eb;
+        --primary-dark: #5524c7;
+        --secondary: #00d4ff;
+        --dark-bg: #0a0a1a;
+        --darker-bg: #050510;
+        --card-bg: rgba(16, 18, 37, 0.8);
+        --text-light: #ffffff;
+        --text-muted: #a0a0c0;
+        --accent: #ff4d7c;
+        --glow: 0 0 15px rgba(107, 52, 235, 0.5);
+        --success: #00c853;
+        --warning: #ffab00;
+        --danger: #ff1744;
+    }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            overscroll-behavior: none;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--text-light);
+            text-shadow: 0 0 10px var(--secondary);
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(107, 52, 235, 0.3);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            filter: drop-shadow(0 0 10px rgba(107, 52, 235, 0.7));
+        }
+
+        .header-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(107, 52, 235, 0.5);
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav a, .side, .nav-show {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: rgba(107, 52, 235, 0.1);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .side {
+            display: none;
+        }
+
+        .nav-show {
+            display: none;
+        }
+
+        .nav a:hover {
+            background: rgba(107, 52, 235, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+
+        /* Main Content */
+        .container {
+            display: flex;
+            margin: 4px 0 0 0;
+            padding: 6rem 2rem 2rem;
+            min-height: 100vh;
+            gap: 2rem;
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), var(--glow);
+            max-height: 80vh;
+            background: var(--darker-bg);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+        }
+
+        #c {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            width: 300px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), var(--glow);
+            height: fit-content;
+            max-height: 80vh;
+            overflow-y: auto;
+            transition: all 0.6s ease;
+        }
+
+        .controls-panel h2, #moleculeName {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            text-align: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(107, 52, 235, 0.3);
+        }
+
+        i {
+            color: var(--secondary);
+        }
+
+        #moleculeName {
+            position: absolute;
+            width: 58.6%;
+            left: 37%;
+            top: 16%;
+            z-index: 10;
+            background: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        #molecule-search {
+            width: 100%;
+            padding: 0.8rem 1.2rem 0.8rem 2rem;
+            background: rgba(16, 18, 37, 0.6);
+            border: 1px solid rgba(107, 52, 235, 0.5);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        #molecule-search:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.3);
+        }
+
+        .search-container .fa-search {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .molecule-list {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .molecule-btn {
+            padding: 0.8rem 1.2rem;
+            background: rgba(107, 52, 235, 0.1);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .molecule-btn:hover {
+            background: rgba(107, 52, 235, 0.3);
+            transform: translateX(5px);
+            box-shadow: var(--glow);
+        }
+
+        .molecule-btn.active {
+            background: rgba(107, 52, 235, 0.5);
+            box-shadow: var(--glow);
+        }
+
+        .molecule-btn .formula {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Instructions */
+        .instructions {
+            margin-top: 2rem;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .instructions h3 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .instructions p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Label style */
+        .label {
+            text-shadow: -1px 1px 3px rgba(0, 0, 0, 0.8);
+            margin-left: 25px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Molecule Details Panel */
+        .molecule-details {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            transition: all 0.3s ease;
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+
+        .molecule-details h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(107, 52, 235, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .molecule-details p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .detail-item {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: var(--secondary);
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            width: 100vw;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(107, 52, 235, 0.3);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            background: rgba(10, 10, 26, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Visualization Controls */
+        .visualization-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .control-btn:hover {
+            background: rgba(107, 52, 235, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-light);
+            font-size: 1.2rem;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 10px;
+            display: none;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(107, 52, 235, 0.3);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(107, 52, 235, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: row;
+            }
+
+            .controls-panel {
+                width: 30%;
+            }
+
+            .canvas-container {
+                min-height: 50vh;
+            }
+
+            header {
+                flex-direction: row;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .header-title {
+                font-size: 1.2rem;
+            }
+
+            #moleculeName {
+                width: 59.5%;
+                left: 36%;
+                top: 12%;
+            }
+
+            footer {
+                position: fixed;
+                bottom: 0;
+                margin-top: 0;
+            }
+
+            .molecule-details {
+                width: 85%;
+                padding: 15px;
+                max-height: 25vh;
+            }
+
+            .detail-item {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
+            .detail-label {
+                min-width: auto;
+                margin-bottom: 3px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: row;
+                min-height: 90vh;
+            }
+
+            .controls-panel {
+                position: absolute;
+                width: 73%;
+                left: -73%;
+                z-index: 99;
+                height: 73.5vh;
+            }
+
+            #moleculeName {
+                width: 83%;
+                left: 9%;
+            }
+
+            .canvas-container {
+                width: 100vw;
+                min-height: 50vh;
+            }
+
+            header {
+                flex-direction: row;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .header-title {
+                font-size: 1.2rem;
+            }
+
+            footer {
+                position: fixed;
+                padding: 1rem;
+                bottom: 0;
+                margin-top: 0;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .nav a {
+                margin: 3px;
+            }
+
+            .nav-show {
+                display: block;
+            }
+
+            .side {
+                display: block;
+                position: absolute;
+                top: 12vh;
+                left: 3vw;
+                z-index: 100;
+            }
+
+            .visualization-controls {
+                flex-direction: column;
+                top: 50px;
+                right: 10px;
+            }
+
+            .control-btn {
+                width: 35px;
+                height: 35px;
+            }
+
+            .molecule-details {
+                width: 80%;
+                padding: 12px;
+                max-height: 22vh;
+                bottom: 15px;
+            }
+
+            .molecule-details h3 {
+                font-size: 1.1rem;
+            }
+
+            .molecule-details p {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 10, 26, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div style="display: flex; align-items: center;">
+            <div class="logo">
+                <i class="fas fa-atom"></i>
+            </div>
+            <div class="header-title">
+                WEB19 3D Molecules Pack
+            </div>
+        </div>
+        <button class="nav-show">
+            <i class="fas fa-arrow-down"></i>
+        </button>
+        <div class="nav">
+            <a href="https://web19dev.netlify.app" target="_blank">Try other WEB19's webs</a>
+            <a href="https://instagram.com/web19dev" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+            <a href="https://tiktok.com/web19dev" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="controls-panel">
+            <h2>Molecule Selection</h2>
+
+            <!-- Search bar -->
+            <div class="search-container">
+                <input type="text" id="molecule-search" placeholder="Search molecules..." />
+            <i class="fas fa-search"></i>
+        </div>
+
+        <div class="molecule-list" id="molecule-buttons">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <button class="side"><i class="fas fa-bars"></i></button>
+
+    <div id="moleculeName"></div>
+    <div class="canvas-container">
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>
+                Loading molecule...
+            </p>
+        </div>
+        <div id="c"></div>
+        <div class="info-panel">
+            <a href="https://threejs.org" target="_blank" rel="noopener">three.js webgl</a> - molecules
+        </div>
+        <div class="visualization-controls">
+            <button class="control-btn" id="resetView" title="Reset View">
+                <i class="fas fa-crosshairs"></i>
+            </button>
+            <button class="control-btn" id="toggleRotation" title="Toggle Rotation">
+                <i class="fas fa-sync"></i>
+            </button>
+            <button class="control-btn" id="toggleLabels" title="Toggle Labels">
+                <i class="fas fa-tag"></i>
+            </button>
+        </div>
+        <div class="instructions">
+            <h3>Controls</h3>
+            <p>
+                • Drag to rotate the molecule<br>• Scroll to zoom in/out<br>• Right-click and drag to pan
+            </p>
+        </div>
+
+        <!-- Molecule Details Panel -->
+        <div class="molecule-details" id="moleculeDetails">
+            <h3>Molecule Information</h3>
+            <div class="detail-item">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value" id="detail-name">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Formula:</span>
+                <span class="detail-value" id="detail-formula">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Type:</span>
+                <span class="detail-value" id="detail-type">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Description:</span>
+                <span class="detail-value" id="detail-description">Select a molecule to view details</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    &copy; 2023 WEB19 Dev | Interactive 3D Molecular Visualizations
+</footer>
+
+<script src="https://kit.fontawesome.com/332454bf6e.js" crossorigin="anonymous"></script>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "./scripts/three.module.js",
+            "three/addons/": "./scripts/addons/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import {
+        TrackballControls
+    } from 'three/addons/TrackballControls.js';
+    import {
+        PDBLoader
+    } from 'three/addons/PDBLoader.js';
+    import {
+        CSS2DRenderer,
+        CSS2DObject
+    } from 'three/addons/CSS2DRenderer.js';
+
+    let camera, scene, renderer, labelRenderer;
+    let controls;
+    let canvas = document.getElementById('c');
+    let loadingElement = document.getElementById('loading');
+
+    let root;
+    let isRotating = true;
+    let labelsVisible = true;
+
+    const MOLECULES = {
+        'Ethanol': {
+            file: 'ethanol',
+            formula: 'C₂H₆O',
+            type: 'Alcohol',
+            description: 'A volatile, flammable, colorless liquid. It is a psychoactive substance and is the principal type of alcohol found in alcoholic drinks.'
+        },
+        'Aspirin': {
+            file: 'aspirin',
+            formula: 'C₉H₈O₄',
+            type: 'Pharmaceutical',
+            description: 'A medication used to reduce pain, fever, or inflammation. Also known as acetylsalicylic acid.'
+        },
+        'Caffeine': {
+            file: 'caffeine',
+            formula: 'C₈H₁₀N₄O₂',
+            type: 'Stimulant',
+            description: 'A central nervous system stimulant of the methylxanthine class. It is the world\'s most widely consumed psychoactive drug.'
+        },
+        'Nicotine': {
+            file: 'nicotine',
+            formula: 'C₁₀H₁₄N₂',
+            type: 'Stimulant',
+            description: 'A naturally produced alkaloid in the nightshade family of plants and is widely used recreationally as a stimulant.'
+        },
+        'LSD': {
+            file: 'lsd',
+            formula: 'C₂₀H₂₅N₃O',
+            type: 'Psychoactive',
+            description: 'A potent psychedelic drug that alters perception and mood. Also known as lysergic acid diethylamide.'
+        },
+        'Cocaine': {
+            file: 'cocaine',
+            formula: 'C₁₇H₂₁NO₄',
+            type: 'Stimulant',
+            description: 'A tropane alkaloid and stimulant drug obtained from the leaves of two coca species. It is primarily used as a recreational drug.'
+        },
+        'Cholesterol': {
+            file: 'cholesterol',
+            formula: 'C₂₇H₄₆O',
+            type: 'Lipid',
+            description: 'An organic molecule essential for animal cell structure and function. A type of steroid and lipid.'
+        },
+        'Lycopene': {
+            file: 'lycopene',
+            formula: 'C₄₀H₅₆',
+            type: 'Carotenoid',
+            description: 'A bright red carotenoid hydrocarbon found in tomatoes and other red fruits and vegetables.'
+        },
+        'Glucose': {
+            file: 'glucose',
+            formula: 'C₆H₁₂O₆',
+            type: 'Sugar',
+            description: 'A simple sugar with the molecular formula C₆H₁₂O₆. Glucose is the most abundant monosaccharide.'
+        },
+        'Adrenaline': {
+            file: 'adrenaline',
+            formula: 'C₉H₁₃NO₃',
+            type: 'Hormone',
+            description: 'A hormone and medication also known as epinephrine. It is involved in the fight-or-flight response.'
+        },
+        'Aluminium oxide': {
+            file: 'Al2O3',
+            formula: 'Al₂O₃',
+            type: 'Ceramic',
+            description: 'A chemical compound of aluminium and oxygen. It is the most commonly occurring of several aluminium oxides.'
+        },
+        'Cubane': {
+            file: 'cubane',
+            formula: 'C₈H₈',
+            type: 'Hydrocarbon',
+            description: 'A synthetic hydrocarbon molecule that consists of eight carbon atoms arranged at the corners of a cube.'
+        },
+        'Dopamine': {
+            file: 'dopamine',
+            formula: 'C₈H₁₁NO₂',
+            type: 'Neurotransmitter',
+            description: 'An organic chemical of the catecholamine and phenethylamine families that plays several important roles in the brain and body.'
+        },
+        'Copper': {
+            file: 'cu',
+            formula: 'Cu',
+            type: 'Metal',
+            description: 'A soft, malleable, and ductile metal with very high thermal and electrical conductivity.'
+        },
+        'Fluorite': {
+            file: 'caf2',
+            formula: 'CaF₂',
+            type: 'Mineral',
+            description: 'A mineral form of calcium fluoride. It is used as a flux in metallurgy and in the manufacture of certain glasses and enamels.'
+        },
+        'Salt': {
+            file: 'nacl',
+            formula: 'NaCl',
+            type: 'Mineral',
+            description: 'An ionic compound with the chemical formula NaCl, representing a 1:1 ratio of sodium and chloride ions.'
+        },
+        'YBCO superconductor': {
+            file: 'ybco',
+            formula: 'YBa₂Cu₃O₇',
+            type: 'Superconductor',
+            description: 'A high-temperature superconductor with critical temperature above 77 K. It is famous for its superconducting properties.'
+        },
+        'Buckyball': {
+            file: 'buckyball',
+            formula: 'C₆₀',
+            type: 'Fullerene',
+            description: 'A spherical fullerene molecule with the formula C₆₀. It has a cage-like fused-ring structure that resembles a soccer ball.'
+        },
+        'Water': {
+            file: 'water',
+            formula: 'H₂O',
+            type: 'Compound',
+            description: 'An inorganic, transparent, tasteless, odorless, and nearly colorless chemical substance, which is the main constituent of Earth\'s hydrosphere.'
+        },
+        'TNT(Trinitrotoluene)': {
+            file: 'tnt',
+            formula: 'C₇H₅N₃O₆',
+            type: 'Explosive',
+            description: 'A yellow solid that is sometimes used as a reagent in chemical synthesis, but is best known as an explosive material.'
+        },
+        'Graphite': {
+            file: 'graphite',
+            formula: 'C',
+            type: 'Allotrope',
+            description: 'A crystalline form of the element carbon with its atoms arranged in a hexagonal structure. It is used in pencils and as a lubricant.'
+        },
+        'Citric acid': {
+            file: 'citric',
+            formula: 'C₆H₈O₇',
+            type: 'Acid',
+            description: 'A weak organic acid that occurs naturally in citrus fruits. It is used as a natural preservative and to add an acidic taste to foods and drinks.'
+        }
+    };
+
+    const params = {
+        molecule: 'Ethanol'
+    };
+
+    const loader = new PDBLoader();
+    const offset = new THREE.Vector3();
+
+    // Create molecule selection buttons
+    const buttonContainer = document.getElementById('molecule-buttons');
+    const searchInput = document.getElementById('molecule-search');
+    let moleculeButtons = [];
+
+    for (const [name, data] of Object.entries(MOLECULES)) {
+        const button = document.createElement('button');
+        button.className = 'molecule-btn';
+        button.innerHTML = `${name} <span class="formula">${data.formula}</span>`;
+        button.dataset.filename = data.file;
+        button.dataset.moleculeName = name;
+        if (data.file === params.molecule) {
+            button.classList.add('active');
+        }
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.molecule-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            loadMolecule(data.file);
+            updateMoleculeDetails(name);
+            document.getElementById('moleculeName').textContent = name;
+            openSide();
+        });
+        buttonContainer.appendChild(button);
+        moleculeButtons.push(button);
+    }
+
+    // Add search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        let hasVisibleResults = false;
+
+        moleculeButtons.forEach(button => {
+            const moleculeName = button.textContent.toLowerCase();
+            if (moleculeName.includes(searchTerm)) {
+                button.style.display = 'flex';
+                hasVisibleResults = true;
+            } else {
+                button.style.display = 'none';
+            }
+        });
+
+        // Show no results message if needed
+        let noResultsMsg = document.querySelector('.no-results');
+        if (!hasVisibleResults) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'no-results';
+                noResultsMsg.textContent = 'No molecules found matching your search';
+                buttonContainer.appendChild(noResultsMsg);
+            }
+        } else if (noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    });
+
+    // Setup control buttons
+    document.getElementById('resetView').addEventListener('click', resetView);
+    document.getElementById('toggleRotation').addEventListener('click', toggleRotation);
+    document.getElementById('toggleLabels').addEventListener('click', toggleLabels);
+
+    // Update molecule details
+    function updateMoleculeDetails(moleculeName) {
+        const molecule = MOLECULES[moleculeName];
+        if (molecule) {
+            document.getElementById('detail-name').textContent = moleculeName;
+            document.getElementById('detail-formula').textContent = molecule.formula;
+            document.getElementById('detail-type').textContent = molecule.type;
+            document.getElementById('detail-description').textContent = molecule.description;
+        }
+    }
+
+    init();
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050505);
+
+        camera = new THREE.PerspectiveCamera(70,
+            canvas.clientWidth / canvas.clientHeight,
+            1,
+            5000);
+        camera.position.z = 1000;
+        scene.add(camera);
+
+        const light1 = new THREE.DirectionalLight(0xffffff,
+            2.5);
+        light1.position.set(1,
+            1,
+            1);
+        scene.add(light1);
+
+        const light2 = new THREE.DirectionalLight(0xffffff,
+            1.5);
+        light2.position.set(-1,
+            -1,
+            1);
+        scene.add(light2);
+
+        root = new THREE.Group();
+        scene.add(root);
+
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true
+        });
+        renderer.setPixelRatio(canvas.devicePixelRatio);
+        renderer.setSize(canvas.clientWidth,
+            canvas.clientHeight);
+        renderer.setAnimationLoop(animate);
+        canvas.appendChild(renderer.domElement);
+
+        labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(canvas.clientWidth,
+            canvas.clientHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        canvas.appendChild(labelRenderer.domElement);
+
+        controls = new TrackballControls(camera,
+            renderer.domElement);
+        controls.minDistance = 500;
+        controls.maxDistance = 2000;
+
+        document.getElementById('moleculeName').textContent = params.molecule;
+        updateMoleculeDetails(params.molecule);
+
+        // Load initial molecule
+        loadMolecule(MOLECULES[params.molecule].file);
+
+        window.addEventListener('resize',
+            onWindowResize);
+    }
+
+    function loadMolecule(model) {
+        loadingElement.style.display = 'block';
+
+        const url = `models/${model}.pdb`;
+
+        while (root.children.length > 0) {
+            const object = root.children[0];
+            object.parent.remove(object);
+        }
+
+        loader.load(url, function (pdb) {
+            const geometryAtoms = pdb.geometryAtoms;
+            const geometryBonds = pdb.geometryBonds;
+            const json = pdb.json;
+
+            const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+            const sphereGeometry = new THREE.IcosahedronGeometry(1, 3);
+
+            geometryAtoms.computeBoundingBox();
+            geometryAtoms.boundingBox.getCenter(offset).negate();
+
+            geometryAtoms.translate(offset.x, offset.y, offset.z);
+            geometryBonds.translate(offset.x, offset.y, offset.z);
+
+            let positions = geometryAtoms.getAttribute('position');
+            const colors = geometryAtoms.getAttribute('color');
+
+            const position = new THREE.Vector3();
+            const color = new THREE.Color();
+
+            for (let i = 0; i < positions.count; i++) {
+                position.x = positions.getX(i);
+                position.y = positions.getY(i);
+                position.z = positions.getZ(i);
+
+                color.r = colors.getX(i);
+                color.g = colors.getY(i);
+                color.b = colors.getZ(i);
+
+                const material = new THREE.MeshPhongMaterial({
+                    color: color
+                });
+                const object = new THREE.Mesh(sphereGeometry, material);
+                object.position.copy(position);
+                object.position.multiplyScalar(75);
+                object.scale.multiplyScalar(25);
+                root.add(object);
+
+                if (labelsVisible) {
+                    const atom = json.atoms[i];
+                    const text = document.createElement('div');
+                    text.className = 'label';
+                    text.style.color = 'rgb(' + atom[3][0] + ',' + atom[3][1] + ',' + atom[3][2] + ')';
+                    text.textContent = atom[4];
+
+                    const label = new CSS2DObject(text);
+                    label.position.copy(object.position);
+                    root.add(label);
+                }
+            }
+
+            positions = geometryBonds.getAttribute('position');
+            const start = new THREE.Vector3();
+            const end = new THREE.Vector3();
+
+            for (let i = 0; i < positions.count; i += 2) {
+                start.x = positions.getX(i);
+                start.y = positions.getY(i);
+                start.z = positions.getZ(i);
+
+                end.x = positions.getX(i + 1);
+                end.y = positions.getY(i + 1);
+                end.z = positions.getZ(i + 1);
+
+                start.multiplyScalar(75);
+                end.multiplyScalar(75);
+
+                const object = new THREE.Mesh(boxGeometry, new THREE.MeshPhongMaterial({
+                    color: 0xffffff
+                }));
+                object.position.copy(start);
+                object.position.lerp(end, 0.5);
+                object.scale.set(5, 5, start.distanceTo(end));
+                object.lookAt(end);
+                root.add(object);
+            }
+
+            loadingElement.style.display = 'none';
+        },
+            undefined,
+            function(error) {
+                console.error('Error loading molecule:', error);
+                loadingElement.innerHTML = '<div style="color: #ff4d7c;">Error loading molecule. Please try another one.</div>';
+            });
+    }
+
+    function onWindowResize() {
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvas.clientWidth,
+            canvas.clientHeight);
+        labelRenderer.setSize(canvas.clientWidth,
+            canvas.clientHeight);
+    }
+
+    function animate() {
+        controls.update();
+
+        if (isRotating) {
+            const angle = Date.now() * 0.0005;
+            root.rotation.x = Math.sin(angle) * 1;
+            root.rotation.z = Math.cos(angle) * 1;
+            root.rotation.y = Math.sin(angle) * .5;
+        }
+
+        render();
+    }
+
+    function render() {
+        renderer.render(scene,
+            camera);
+        labelRenderer.render(scene,
+            camera);
+    }
+
+    function resetView() {
+        controls.reset();
+        root.rotation.set(0, 0, 0);
+    }
+
+    function toggleRotation() {
+        isRotating = !isRotating;
+        const icon = document.getElementById('toggleRotation').querySelector('i');
+        if (isRotating) {
+            icon.className = 'fas fa-sync';
+        } else {
+            icon.className = 'fas fa-sync fa-spin';
+        }
+    }
+
+    function toggleLabels() {
+        labelsVisible = !labelsVisible;
+        // For a complete implementation, we would need to
+        // recreate the molecule with or without labels
+        const icon = document.getElementById('toggleLabels').querySelector('i');
+        if (labelsVisible) {
+            icon.style.color = 'var(--secondary)';
+        } else {
+            icon.style.color = 'var(--text-muted)';
+        }
+        // Reload the current molecule to apply label changes
+        const activeBtn = document.querySelector('.molecule-btn.active');
+        if (activeBtn) {
+            loadMolecule(activeBtn.dataset.filename);
+        }
+    }
+
+    const btn = document.querySelector('.side')
+
+    function openSide() {
+        const sideBar = document.querySelector('.controls-panel')
+
+        if (sideBar.style.left === '-60%' || sideBar.style.left === '') {
+            sideBar.style.left = '7.9%'
+            btn.style.transform = 'rotate(180deg)'
+            btn.innerHTML = '<i class="fas fa-xmark"></i>'
+        } else {
+            sideBar.style.left = '-73%'
+            btn.style.transform = 'rotate(0deg)'
+            btn.innerHTML = '<i class="fas fa-bars"></i>'
+        }
+    }
+    btn.addEventListener('click', openSide)
+
+    const navBtn = document.querySelector('.nav-show')
+
+    function openNav() {
+        const nav = document.querySelector('.nav')
+        const header = document.querySelector('#header')
+
+        if (nav.style.display === 'block') {
+            header.style.flexDirection = 'row'
+            nav.style.display = 'none'
+            navBtn.innerHTML = '<i class="fas fa-arrow-down"></i>'
+        } else {
+            header.style.flexDirection = 'column'
+            nav.style.display = 'block'
+            navBtn.innerHTML = '<i class="fas fa-xmark"></i>'
+        }
+    }
+    navBtn.addEventListener('click', openNav)
+</script>
+</body>
+</html>
