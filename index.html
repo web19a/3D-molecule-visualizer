@@ -528,9 +528,9 @@
             &#x2193;
         </button>
         <div class="nav">
-            <a href="https://web19dev.netlify.app">Try other WEB19's webs</a>
-            <a href="https://instagram.com/web19dev"><i class="fab fa-instagram"></i> Instagram</a>
-            <a href="https://tiktok.com/web19dev"><i class="fab fa-tiktok"></i> TikTok</a>
+            <a href="https://web19dev.netlify.app" target="_blank">Try other WEB19's webs</a>
+            <a href="https://instagram.com/web19dev" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+            <a href="https://tiktok.com/web19dev" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
         </div>
     </header>
 
@@ -590,8 +590,8 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "./scripts/three.module.js",
-                "three/addons/": "./scripts/addons/"
+                "three": "./three.module.js",
+                "three/addons/": "./"
             }
         }
     </script>
@@ -644,7 +644,7 @@
         };
 
         const params = {
-            molecule: 'Dopamine'
+            molecule: 'Ethanol'
         };
 
         const loader = new PDBLoader();
@@ -876,12 +876,12 @@
         function animate() {
             controls.update();
             
-            /*if (isRotating) {
+            if (isRotating) {
                 const angle = Date.now() * 0.0005;
                 root.rotation.x = Math.sin(angle) * 1;
                 root.rotation.z = Math.cos(angle) * 1;
                 root.rotation.y = Math.sin(angle) * .5;
-            }*/
+            }
             
             render();
         }
