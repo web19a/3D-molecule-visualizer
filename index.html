@@ -937,9 +937,11 @@
             if (sideBar.style.left === '-60%' || sideBar.style.left === '') {
                 sideBar.style.left = '7.9%'
                 btn.style.transform = 'rotate(180deg)'
+                btn.innerHTML = '<i class="fas fa-xmark"></i>'
             } else {
                 sideBar.style.left = '-60%'
                 btn.style.transform = 'rotate(0deg)'
+                btn.innerHTML = '<i class="fas fa-arrow-down"></i>'
             }
         }
         btn.addEventListener('click', openSide)
@@ -953,11 +955,11 @@
             if (nav.style.display === 'block') {
                 header.style.flexDirection = 'row'
                 nav.style.display = 'none'
-                navBtn.innerHTML = '&#x2193;'
+                navBtn.innerHTML = '<i class="fas fa-arrow-down"></i>'
             } else {
                 header.style.flexDirection = 'column'
                 nav.style.display = 'block'
-                navBtn.innerHTML = '&times;'
+                navBtn.innerHTML = '<i class="fas fa-xmark"></i>'
             }
         }
         navBtn.addEventListener('click', openNav)
