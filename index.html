@@ -773,7 +773,7 @@
         function loadMolecule(model) {
             loadingElement.style.display = 'block';
             
-            const url = `models/${model}.pdb`;
+            const url = `${model}.pdb`;
 
             while (root.children.length > 0) {
                 const object = root.children[0];
